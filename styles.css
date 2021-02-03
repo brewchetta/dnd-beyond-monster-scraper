@@ -1,0 +1,27 @@
+:root {
+  --mistblue: #296171;
+}
+
+label {
+  animation: appear 1s;
+  color: var(--mistblue)
+}
+
+@keyframes appear {
+  0% {opacity: 0}
+  100% {opacity: 1}
+}
+
+body {
+  background-color: black;
+  background-image: url("https://i.pinimg.com/originals/18/81/b7/1881b7b391bda6d82183d5a33c83699a.jpg");
+  background-size: cover;
+  background-position: top;
+  min-width: 300px;
+}
+
+h3 {
+  text-align: center;
+  color: white;
+  background: var(--mistblue);
+}
