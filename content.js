@@ -1,18 +1,6 @@
 const STAT_BLOCK = `mon-stat-block__`
 let monster = {}
 
-// Get sync function
-const handleGetSync = callback => {
-  try { browser.storage.local.get().then(callback, console.error) }
-  catch (e) {console.warn(e)}
-}
-
-// Set sync function
-const handleSetSync = object => {
-  try { browser.storage.local.set(object) }
-  catch(e){console.warn(e)}
-}
-
 const handleScrape = () => {
   const elements = {
     header: document.querySelector(`.${STAT_BLOCK}header`),
@@ -112,6 +100,17 @@ const buildAction = p => {
     const spells = cantrips[0].split(": ")[1].split(", ").map(sp => {
       return {
         name: sp,
+        level: 0
+      }
+    })
+    monster.spells = [...monster.spells, ...spells]
+  }
+
+  const innateSpells = p.innerText.match(/[1-9]\/day[:,' a-z]*/)
+  if (innateSpells && innateSpells[0]) {
+    const spells = innateSpells[0].split(": ")[1].split(", ").map(sp => {
+      return {
+        name: sp.replace(/\([\w]*\)/, "").trim(),
         level: 0
       }
     })

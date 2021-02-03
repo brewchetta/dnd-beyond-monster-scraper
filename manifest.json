@@ -7,11 +7,11 @@
   "description": "On a monster's page, finds and scrapes that monster's stat block.",
 
   "icons": {
-    "48": "icons/handprint-32x32.png"
+    "48": "icons/emblem-32x32.png"
   },
 
   "browser_action": {
-    "default_icon": "icons/handprint-32x32.png",
+    "default_icon": "icons/emblem-32x32.png",
     "default_title": "DnD Beyond Monster Scraper",
     "default_popup": "settings.html"
   },
