@@ -43,11 +43,11 @@ const buildTidbit = tidbit => {
 
   switch (label) {
     case "Saving Throws":
-      data = "Saving Throw: " + data.replace(", ", " | Saving Throw: ")
+      data = "Saving Throw: " + data.replaceAll(", ", " | Saving Throw: ")
       monster.proficiencies = monster.proficiencies ? monster.proficiencies + " | " + data : data
       break;
     case "Skills":
-      data = "Skill: " + data.replace(", ", " | Skill: ")
+      data = "Skill: " + data.replaceAll(", ", " | Skill: ")
       monster.proficiencies = monster.proficiencies ? monster.proficiencies + " | " + data : data
       break;
     case "Damage Resistances":
@@ -63,14 +63,14 @@ const buildTidbit = tidbit => {
       monster.condition_immunities = buildArray()
       break;
     case "Senses":
-      monster.senses = data.replace(", "," | ")
+      monster.senses = data.replaceAll(", "," | ")
       break;
     case "Languages":
       monster.languages = data
       break;
     case "Challenge":
       monster.challenge_rating = data.split(" ")[0]
-      monster.xp = parseInt(data.match(/\((.*?)\)/)[1].replace(",",""))
+      monster.xp = parseInt(data.match(/\((.*?)\)/)[1].replaceAll(",",""))
       break;
     default:
       console.log("wasn't able to build tidbit from that")
@@ -82,12 +82,12 @@ const buildAction = p => {
 
   const spell_modifier = p.innerText.match(/\+[0-9]+ to hit with spell attacks/)
   if (spell_modifier) {
-    monster.spell_modifier = parseInt(spell_modifier[0].replace(" to hit with spell attacks", ""))
+    monster.spell_modifier = parseInt(spell_modifier[0].replaceAll(" to hit with spell attacks", ""))
   }
 
   const spell_dc = p.innerText.match(/spell save DC [0-9]+/)
   if (spell_dc) {
-    monster.spell_dc = parseInt(spell_dc[0].replace("spell save DC", ""))
+    monster.spell_dc = parseInt(spell_dc[0].replaceAll("spell save DC", ""))
   }
 
   const spell_level = p.innerText.match(/is an [0-9]+[a-z]+-level spellcaster/)
@@ -110,7 +110,7 @@ const buildAction = p => {
   if (innateSpells && innateSpells[0]) {
     const spells = innateSpells[0].split(": ")[1].split(", ").map(sp => {
       return {
-        name: sp.replace(/\([\w]*\)/, "").trim(),
+        name: sp.replaceAll(/\([\w]*\)/, "").trim(),
         level: 0
       }
     })
@@ -135,8 +135,8 @@ const buildAction = p => {
     const name = p.querySelector('em').innerText
 
     return {
-      name: name.replace(". ", ""),
-      desc: p.innerText.replace(name, "")
+      name: name.replaceAll(". ", ""),
+      desc: p.innerText.replaceAll(name, "")
     }
   }
 }
@@ -170,7 +170,7 @@ const buildMonsterStats = (elements) => {
   console.log(attributes.children[1].querySelector(`.${STAT_BLOCK}attribute-data-extra`).innerText)
 
   monster = {
-    index: getStatText(header, `name-link`).toLowerCase().replace(` `,`-`),
+    index: getStatText(header, `name-link`).toLowerCase().replaceAll(` `,`-`),
     name: getStatText(header, `name-link`),
     size: getStatText(header, `meta`).split(` `)[0],
     type: getStatText(header, `meta`).split(` `)[1],
