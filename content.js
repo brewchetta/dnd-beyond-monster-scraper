@@ -117,10 +117,10 @@ const buildAction = p => {
     monster.spells = [...monster.spells, ...spells]
   }
 
-  const leveledSpells = p.innerText.match(/[1-9][a-z]* level \([0-9] slot[s]*\):[a-z ,']*/)
+  const leveledSpells = p.innerText.match(/[1-9][a-z]* level \([0-9] slot[s]*\):[a-z ,'*]*/)
   if (leveledSpells && leveledSpells[0]) {
-    const level = leveledSpells[0][0]
-    const spells = leveledSpells[0].split(": ")[1].split(", ").map(sp => {
+    const level = parseInt(leveledSpells[0][0])
+    const spells = leveledSpells[0].replaceAll("*","").split(": ")[1].split(", ").map(sp => {
       return {
         name: sp,
         level
