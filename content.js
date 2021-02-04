@@ -110,7 +110,7 @@ const buildAction = p => {
   if (innateSpells && innateSpells[0]) {
     const spells = innateSpells[0].split(": ")[1].split(", ").map(sp => {
       return {
-        name: sp.replaceAll(/\([\w]*\)/, "").trim(),
+        name: sp.replace(/\([\w]*\)/g, "").trim(),
         level: 0
       }
     })
