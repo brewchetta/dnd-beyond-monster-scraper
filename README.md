@@ -1,5 +1,4 @@
-## Touch of Invisibility
-
+## D&D Beyond Monster Scraper
 Scrapes the stat block for a monster on DnD Beyond and creates a file for it. Used because doing this by hand is hard work and webpage has protections against ruby scrapers.
 
 ### Firefox Instructions
