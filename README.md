@@ -16,3 +16,5 @@ Clone this repo and navigate to `/chrome://extensions` in the browser. In the up
 Click `Load unpacked` and navigate to the repo, choosing the entire folder. The extension should now be loaded for this session of chrome.
 
 ### Using the Extension
+
+Navigate to the monster stats of your choice and press the `z` button. This should automatically prompt you to download a `.json` file for the monster you've chosen.
