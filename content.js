@@ -178,7 +178,7 @@ const buildMonsterStats = (elements) => {
     alignment: getStatText(header, `meta`).split(`,`)[1],
     armor_class: parseInt(attributes.querySelectorAll(`.${STAT_BLOCK}attribute-data-value`)[0].innerText),
     hit_points: parseInt(attributes.querySelectorAll(`.${STAT_BLOCK}attribute-data-value`)[1].innerText),
-    hit_dice: attributes.children[1].querySelector(`.${STAT_BLOCK}attribute-data-extra`).innerText.match(/[1-9]*d[1-9]*/)[0],
+    hit_dice: attributes.children[1].querySelector(`.${STAT_BLOCK}attribute-data-extra`).innerText.match(/[0-9]*d[0-9]*/)[0],
     speed: buildSpeeds(attributes.querySelectorAll(`.${STAT_BLOCK}attribute-data-value`)[2].innerText),
     strength: parseInt(statBlock.querySelectorAll(".ability-block__score")[0].innerText),
     dexterity: parseInt(statBlock.querySelectorAll(".ability-block__score")[1].innerText),
