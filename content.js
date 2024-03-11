@@ -2,14 +2,13 @@ const STAT_BLOCK = `mon-stat-block__`
 let monster = {}
 
 const handleScrape = () => {
-  const elements = {
-    header: document.querySelector(`.${STAT_BLOCK}header`),
-    attributes: document.querySelector(`.${STAT_BLOCK}attributes`),
-    statBlock: document.querySelector(`.${STAT_BLOCK}stat-block`),
-    tidbits: document.querySelector(`.${STAT_BLOCK}tidbits`),
-    descriptionBlocks: document.querySelector(`.${STAT_BLOCK}description-blocks`)
+  if (window.location.href.includes('/monsters/')) {
+    buildMonsterStats()
+  } else if (window.location.href.includes('/spells/')) {
+    buildSpellData()
+  } else {
+    console.error("Unable to scrape, invalid URL ( must be within /monsters/ or /spells/ )")
   }
-  buildMonsterStats(elements)
 }
 
 const getStatText = (element = document, name) => element.querySelector(`.${STAT_BLOCK}${name}`).innerText
@@ -117,7 +116,7 @@ const buildAction = p => {
     monster.spells = [...monster.spells, ...spells]
   }
 
-  const leveledSpells = p.innerText.match(/[1-9][a-z]* level \([0-9] slot[s]*\):[a-z ,'*]*/)
+  const leveledSpells = p.innerText.match(/[0-9][a-z]* level \([0-9] slot[s]*\):[a-z ,'*]*/)
   if (leveledSpells && leveledSpells[0]) {
     const level = parseInt(leveledSpells[0][0])
     const spells = leveledSpells[0].replaceAll("*","").split(": ")[1].split(", ").map(sp => {
@@ -156,16 +155,27 @@ const buildDescriptionBlocks = descriptionBlocks => {
   })
 }
 
-const download = () => {
+const download = (obj) => {
     var a = document.createElement("a");
-    var file = new Blob([JSON.stringify(monster)], {type: 'text/plain'})
+    var file = new Blob([JSON.stringify(obj)], {type: 'text/plain'})
     a.href = URL.createObjectURL(file);
-    a.download = `${monster.index}.json`
+    a.download = `${obj.index}.json`
     a.click();
     a.remove()
 }
 
-const buildMonsterStats = (elements) => {
+// --- BUILD MONSTER STATS --- //
+
+const buildMonsterStats = () => {
+
+  const elements = {
+    header: document.querySelector(`.${STAT_BLOCK}header`),
+    attributes: document.querySelector(`.${STAT_BLOCK}attributes`),
+    statBlock: document.querySelector(`.${STAT_BLOCK}stat-block`),
+    tidbits: document.querySelector(`.${STAT_BLOCK}tidbits`),
+    descriptionBlocks: document.querySelector(`.${STAT_BLOCK}description-blocks`)
+  }
+
   const {header, attributes, statBlock, tidbits, descriptionBlocks} = elements
   console.log(attributes.children[1].querySelector(`.${STAT_BLOCK}attribute-data-extra`).innerText)
 
@@ -188,7 +198,8 @@ const buildMonsterStats = (elements) => {
     charisma: parseInt(statBlock.querySelectorAll(".ability-block__score")[5].innerText),
     spells: [],
     spell_slots: {},
-    url: window.location.href
+    url: window.location.href,
+    source: document.querySelector('p.source.monster-source').textContent.replaceAll(/\n[ ]*/g, '')
   }
 
   Array.from(tidbits.children).forEach(tidbit => {
@@ -199,7 +210,68 @@ const buildMonsterStats = (elements) => {
 
   console.clear()
   console.log(monster);
-  download()
+  download(monster)
+}
+
+// --- BUILD SPELL DATA --- //
+
+const buildSpellData = () => {
+
+  const spellObj = {}
+
+  spellObj.index = window.location.href.split('/')[window.location.href.split('/').length - 1]
+
+  spellObj.name = document.querySelector('h1.page-title').innerText
+
+  const spellInfoDescriptions = Array.from( document.querySelectorAll('div.more-info-content p') ).map(p => p.textContent)
+  
+  spellObj.description = ''
+  spellInfoDescriptions.forEach(d => {
+    if (d.includes('At Higher Levels')) {
+      spellObj.at_higher_levels = d
+    } else {
+      spellObj.description += d + '\n'
+    }
+  })
+  
+  const levelText = document.querySelector('div.ddb-statblock-item.ddb-statblock-item-level div.ddb-statblock-item-value').textContent.replaceAll(/\n| /g,'')
+  if (levelText == 'Cantrip') {
+    spellObj.level = 0
+  } else {
+    spellObj.level = parseInt(levelText)
+  }
+
+  spellObj.casting_time = document.querySelector('div.ddb-statblock-item.ddb-statblock-item-casting-time div.ddb-statblock-item-value').textContent.replaceAll(/([ ]*\n[ ]*)|(Ritual)/g, '')
+
+  spellObj.ritual = !!document.querySelector('div.ddb-statblock-item.ddb-statblock-item-casting-time .i-ritual')
+
+  spellObj.duration = document.querySelector('div.ddb-statblock-item.ddb-statblock-item-duration div.ddb-statblock-item-value').textContent.replaceAll(/([ ]*\n[ ]*)/g, '')
+
+  spellObj.concentration = !!document.querySelector('div.ddb-statblock-item-duration i.i-concentration')
+
+  spellObj.range_area = document.querySelector('div.ddb-statblock-item.ddb-statblock-item-range-area div.ddb-statblock-item-value').textContent.replaceAll(/([ ]*\n[ ]*)/g, '')
+
+  const componentsText = document.querySelector('div.ddb-statblock-item.ddb-statblock-item-components div.ddb-statblock-item-value').textContent.replaceAll(/([ ]*\n[ ]*)/g, '')
+
+  spellObj.verbal = componentsText.includes('V')
+
+  spellObj.somatic = componentsText.includes('S')
+
+  spellObj.material = document.querySelector('span.components-blurb')?.textContent
+
+  spellObj.school = document.querySelector('div.ddb-statblock-item.ddb-statblock-item-school div.ddb-statblock-item-value').textContent.replaceAll(/([ ]*\n[ ]*)/g, '')
+
+  spellObj.attack_save = document.querySelector('div.ddb-statblock-item.ddb-statblock-item-attack-save div.ddb-statblock-item-value').textContent.replaceAll(/([ ]*\n[ ]*)/g, '')
+
+  spellObj.damage_effect = document.querySelector('div.ddb-statblock-item.ddb-statblock-item-damage-effect div.ddb-statblock-item-value').textContent.replaceAll(/([ ]*\n[ ]*)/g, '')
+
+  spellObj.source = document.querySelector('p.source.spell-source').textContent.replaceAll(/([ ]*\n[ ]*)/g, '')
+
+  spellObj.url = window.location.href
+
+  console.clear()
+  console.log(spellObj);
+  download(spellObj)
 }
 
 
@@ -215,4 +287,4 @@ const handleKeyPress = ({keyCode}) => {
 
 document.addEventListener(`keyup`, handleKeyPress)
 console.clear()
-console.log("Monster scraper active");
+console.log("Monster scraper active")
