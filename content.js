@@ -223,14 +223,18 @@ const buildSpellData = () => {
 
   spellObj.name = document.querySelector('h1.page-title').innerText
 
-  const spellInfoDescriptions = Array.from( document.querySelectorAll('div.more-info-content p') ).map(p => p.textContent)
+  const spellInfoDescriptions = Array.from( document.querySelectorAll('div.more-info-content p, div.more-info-content li') )
   
   spellObj.description = ''
-  spellInfoDescriptions.forEach(d => {
-    if (d.includes('At Higher Levels')) {
-      spellObj.at_higher_levels = d
+  let liCounter = 0
+  spellInfoDescriptions.forEach(el => {
+    if (el.textContent.includes('At Higher Levels')) {
+      spellObj.at_higher_levels = el.textContent
+    } else if (el.tagName == 'LI' && el.parentElement.tagName == 'OL') {
+      liCounter += 1
+      spellObj.description += `${liCounter}. ${el.textContent}\n`
     } else {
-      spellObj.description += d + '\n'
+      spellObj.description += el.textContent + '\n'
     }
   })
   
