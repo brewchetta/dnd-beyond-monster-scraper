@@ -255,6 +255,14 @@ const buildSpellData = () => {
 
   spellObj.range_area = document.querySelector('div.ddb-statblock-item.ddb-statblock-item-range-area div.ddb-statblock-item-value').textContent.replaceAll(/([ ]*\n[ ]*)/g, '')
 
+  const areaIcon = document.querySelector('div.ddb-statblock-item.ddb-statblock-item-range-area i')
+  for (shape of ['cube', 'cone', 'line', 'cylinder', 'sphere', 'square']) {
+    if (areaIcon && areaIcon.className.includes(shape)) {
+      spellObj.range_area = spellObj.range_area.replace(')', '') + `${shape})`
+    }
+  }
+
+
   const componentsText = document.querySelector('div.ddb-statblock-item.ddb-statblock-item-components div.ddb-statblock-item-value').textContent.replaceAll(/([ ]*\n[ ]*)/g, '')
 
   spellObj.verbal = componentsText.includes('V')
