@@ -1,13 +1,25 @@
 const STAT_BLOCK = `mon-stat-block__`
-let monster = {}
+
+const handleOpenAllMonsterBlocks = () => {
+  const infoBlocks = Array.from(document.querySelectorAll('div.info'))
+  console.log(infoBlocks)
+  for (i = 0; i < infoBlocks.length; i++) {
+    infoBlocks[i].click()
+  }
+}
 
 const handleScrape = () => {
   if (window.location.href.includes('/monsters/')) {
     buildMonsterStats()
   } else if (window.location.href.includes('/spells/')) {
     buildSpellData()
+  } else if (window.location.href.includes('/monsters')) {
+    const monsterBlocks = Array.from(document.querySelectorAll('div.more-info.more-info-monster'))
+    for (i = 0; i < monsterBlocks.length; i++) {
+      buildMonsterStats(monsterBlocks[i])
+    }
   } else {
-    console.error("Unable to scrape, invalid URL ( must be within /monsters/ or /spells/ )")
+    console.error("Unable to scrape, invalid URL ( must be within /monsters, /monsters/ or /spells/ )")
   }
 }
 
@@ -25,7 +37,7 @@ const buildSpeeds = (text) => {
   return speed
 }
 
-const buildTidbit = tidbit => {
+const buildTidbit = (tidbit, monster) => {
   const label = tidbit.querySelector(`.${STAT_BLOCK}tidbit-label`).innerText
   let data = tidbit.querySelector(`.${STAT_BLOCK}tidbit-data`).innerText
 
@@ -77,7 +89,7 @@ const buildTidbit = tidbit => {
   }
 }
 
-const buildAction = p => {
+const buildAction = (p, monster) => {
 
   const spell_modifier = p.innerText.match(/\+[0-9]+ to hit with spell attacks/)
   if (spell_modifier) {
@@ -140,17 +152,17 @@ const buildAction = p => {
   }
 }
 
-const buildDescriptionBlocks = descriptionBlocks => {
+const buildDescriptionBlocks = (descriptionBlocks, monster) => {
   Array.from(descriptionBlocks.children).forEach(block => {
     const sectionTitle = block.children[0].innerText
     if (sectionTitle === "Actions") {
-      monster.actions = Array.from(block.querySelectorAll('p')).map(p => buildAction(p)).filter(a => !!a)
+      monster.actions = Array.from(block.querySelectorAll('p')).map(p => buildAction(p, monster)).filter(a => !!a)
     } else if (sectionTitle === "Reactions") {
-      monster.reactions = Array.from(block.querySelectorAll('p')).map(p => buildAction(p)).filter(a => !!a)
+      monster.reactions = Array.from(block.querySelectorAll('p')).map(p => buildAction(p, monster)).filter(a => !!a)
     } else if (sectionTitle === "Legendary Actions") {
-      monster.legendary_actions = Array.from(block.querySelectorAll('p')).map(p => buildAction(p)).filter(a => !!a)
+      monster.legendary_actions = Array.from(block.querySelectorAll('p')).map(p => buildAction(p, monster)).filter(a => !!a)
     } else {
-      monster.special_abilities = Array.from(block.querySelectorAll('p')).map(p => buildAction(p)).filter(a => !!a)
+      monster.special_abilities = Array.from(block.querySelectorAll('p')).map(p => buildAction(p, monster)).filter(a => !!a)
     }
   })
 }
@@ -166,24 +178,27 @@ const download = (obj) => {
 
 // --- BUILD MONSTER STATS --- //
 
-const buildMonsterStats = () => {
+const buildMonsterStats = (containerElement=document) => {
 
   const elements = {
-    header: document.querySelector(`.${STAT_BLOCK}header`),
-    attributes: document.querySelector(`.${STAT_BLOCK}attributes`),
-    statBlock: document.querySelector(`.${STAT_BLOCK}stat-block`),
-    tidbits: document.querySelector(`.${STAT_BLOCK}tidbits`),
-    descriptionBlocks: document.querySelector(`.${STAT_BLOCK}description-blocks`)
+    header: containerElement.querySelector(`.${STAT_BLOCK}header`),
+    attributes: containerElement.querySelector(`.${STAT_BLOCK}attributes`),
+    statBlock: containerElement.querySelector(`.${STAT_BLOCK}stat-block`),
+    tidbits: containerElement.querySelector(`.${STAT_BLOCK}tidbits`),
+    descriptionBlocks: containerElement.querySelector(`.${STAT_BLOCK}description-blocks`)
   }
 
   const {header, attributes, statBlock, tidbits, descriptionBlocks} = elements
-  console.log(attributes.children[1].querySelector(`.${STAT_BLOCK}attribute-data-extra`).innerText)
+  // console.log(attributes.children[1].querySelector(`.${STAT_BLOCK}attribute-data-extra`).innerText)
 
-  monster = {
+  const sizesRegex = /(tiny|small|medium|large|huge|gargantuan)/gi
+  const typesRegex = /(aberration|beast|celestial|construct|dragon|elemental|fey|fiend|giant|humanoid|monstrosity|ooze|plant|undead)/gi
+
+  const monster = {
     index: getStatText(header, `name-link`).toLowerCase().replaceAll(` `,`-`),
     name: getStatText(header, `name-link`),
-    size: getStatText(header, `meta`).split(` `)[0],
-    type: getStatText(header, `meta`).split(` `)[1],
+    size: getStatText(header, `meta`).match(sizesRegex)[0],
+    type: getStatText(header, `meta`).match(typesRegex)[0],
     subtype: getStatText(header, `meta`).match(/\((.*?)\)/) && getStatText(header, `meta`).match(/\((.*?)\)/)[1],
     alignment: getStatText(header, `meta`).split(`,`)[1],
     armor_class: parseInt(attributes.querySelectorAll(`.${STAT_BLOCK}attribute-data-value`)[0].innerText),
@@ -199,14 +214,14 @@ const buildMonsterStats = () => {
     spells: [],
     spell_slots: {},
     url: window.location.href,
-    source: document.querySelector('p.source.monster-source').textContent.replaceAll(/\n[ ]*/g, '')
+    source: containerElement.querySelector('p.source.monster-source')?.textContent?.replaceAll(/\n[ ]*/g, '') || containerElement.querySelector('div.more-info-footer-source')?.textContent?.replaceAll(/\n[ ]*/g, '')
   }
 
   Array.from(tidbits.children).forEach(tidbit => {
-    buildTidbit(tidbit)
+    buildTidbit(tidbit, monster)
   });
 
-  buildDescriptionBlocks(descriptionBlocks)
+  buildDescriptionBlocks(descriptionBlocks, monster)
 
   console.clear()
   console.log(monster);
@@ -291,6 +306,13 @@ const handleKeyPress = ({keyCode}) => {
   if (keyCode === 90) {
     try {
       handleScrape()
+    } catch (e) {
+      console.error(e)
+    }
+  }
+  if (keyCode === 88) {
+    try {
+      handleOpenAllMonsterBlocks()
     } catch (e) {
       console.error(e)
     }
