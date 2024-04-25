@@ -183,11 +183,10 @@ const buildDescriptionBlocks = (descriptionBlocks, monster) => {
 
 const download = (obj) => {
     var a = document.createElement("a");
-    // TODO: ADD BACK IN
-    // var file = new Blob([JSON.stringify(obj)], {type: 'text/plain'})
-    // a.href = URL.createObjectURL(file);
-    // a.download = `${obj.index}.json`
-    // a.click();
+    var file = new Blob([JSON.stringify(obj)], {type: 'text/plain'})
+    a.href = URL.createObjectURL(file);
+    a.download = `${obj.index}.json`
+    a.click();
     a.remove()
 }
 
