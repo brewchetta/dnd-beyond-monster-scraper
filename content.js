@@ -22,6 +22,9 @@ const handleScrape = () => {
     for (i = 0; i < monsterBlocks.length; i++) {
       buildMonsterStats(monsterBlocks[i])
     }
+    const randTime = Math.ceil((Math.random() * 750) + 750)
+    console.log(randTime)
+    setTimeout(goToNextPage, randTime)
   } else {
     console.error("Unable to scrape, invalid URL ( must be within /monsters, /monsters/ or /spells/ )")
   }
@@ -152,7 +155,7 @@ const buildAction = (p, monster) => {
     let desc = p.innerText.replaceAll(name, "")
     let nextElement = p.nextElementSibling
     let counter = 0
-    while (nextElement.tagName.toLowerCase() === "p" && !nextElement.querySelector('strong') && counter < 10) {
+    while (nextElement?.tagName?.toLowerCase() === "p" && !nextElement?.querySelector('strong') && counter < 10) {
       console.log(nextElement)
       desc += `\n${nextElement.textContent}`
       nextElement = nextElement.nextElementSibling
@@ -322,6 +325,7 @@ const buildSpellData = () => {
 // --- MOVE TO NEXT / PREVIOUS PAGE --- //
 
 const goToNextPage = () => {
+  console.log("GOING TO NEXT PAGE")
   const nextButton = Array.from(document.querySelectorAll("a"))
   .find(a => a.textContent === "Next")
 
