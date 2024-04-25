@@ -1,5 +1,7 @@
 const STAT_BLOCK = `mon-stat-block__`
 
+// --- OPEN ALL BLOCKS --- //
+
 const handleOpenAllMonsterBlocks = () => {
   const infoBlocks = Array.from(document.querySelectorAll('div.info'))
   console.log(infoBlocks)
@@ -7,6 +9,8 @@ const handleOpenAllMonsterBlocks = () => {
     infoBlocks[i].click()
   }
 }
+
+// --- SCRAPE ALL BLOCKS ON PAGE --- //
 
 const handleScrape = () => {
   if (window.location.href.includes('/monsters/')) {
@@ -315,6 +319,27 @@ const buildSpellData = () => {
   download(spellObj)
 }
 
+// --- MOVE TO NEXT / PREVIOUS PAGE --- //
+
+const goToNextPage = () => {
+  const nextButton = Array.from(document.querySelectorAll("a"))
+  .find(a => a.textContent === "Next")
+
+  if (nextButton) {
+    nextButton.click()
+  }
+}
+
+const goToPrevPage = () => {
+  const prevButton = Array.from(document.querySelectorAll("a"))
+  .find(a => a.textContent === "Prev")
+
+  if (prevButton) {
+    prevButton.click()
+  }
+}
+
+// --- KEY PRESSES --- //
 
 const handleKeyPress = ({keyCode}) => {
   if (keyCode === 90) {
@@ -331,7 +356,23 @@ const handleKeyPress = ({keyCode}) => {
       console.error(e)
     }
   }
+  if (keyCode === 37) {
+    try {
+      goToPrevPage()
+    } catch (e) {
+      console.error(e)
+    }
+  }
+  if (keyCode === 39) {
+    try {
+      goToNextPage()
+    } catch (e) {
+      console.error(e)
+    }
+  }
 }
+
+// --- RUN --- //
 
 document.addEventListener(`keyup`, handleKeyPress)
 console.clear()
