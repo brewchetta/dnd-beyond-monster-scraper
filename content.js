@@ -142,8 +142,22 @@ const buildAction = (p, monster) => {
     monster.spells = [...monster.spells, ...spells]
   }
 
-  if (p.querySelector('em')) {
-    const name = p.querySelector('em').innerText
+  if (p.querySelector('strong')?.textContent == "Innate Spellcasting." || p.querySelector('strong')?.textContent == "Spellcasting.") {
+    console.log(p)
+    const name = p.querySelector('strong').innerText
+    let desc = p.innerText.replaceAll(name, "")
+    let nextElement = p.nextElementSibling
+    let counter = 0
+    while (nextElement.tagName.toLowerCase() === "p" && !nextElement.querySelector('strong') && counter < 10) {
+      console.log(nextElement)
+      desc += `\n${nextElement.textContent}`
+      nextElement = nextElement.nextElementSibling
+      counter += 1
+    }
+    return { name, desc }
+    
+  } else if (p.querySelector('strong')) {
+    const name = p.querySelector('strong').innerText
 
     return {
       name: name.replaceAll(". ", ""),
@@ -169,10 +183,11 @@ const buildDescriptionBlocks = (descriptionBlocks, monster) => {
 
 const download = (obj) => {
     var a = document.createElement("a");
-    var file = new Blob([JSON.stringify(obj)], {type: 'text/plain'})
-    a.href = URL.createObjectURL(file);
-    a.download = `${obj.index}.json`
-    a.click();
+    // TODO: ADD BACK IN
+    // var file = new Blob([JSON.stringify(obj)], {type: 'text/plain'})
+    // a.href = URL.createObjectURL(file);
+    // a.download = `${obj.index}.json`
+    // a.click();
     a.remove()
 }
 
@@ -213,7 +228,7 @@ const buildMonsterStats = (containerElement=document) => {
     charisma: parseInt(statBlock.querySelectorAll(".ability-block__score")[5].innerText),
     spells: [],
     spell_slots: {},
-    url: window.location.href,
+    url: header.querySelector('.mon-stat-block__name-link').href,
     source: containerElement.querySelector('p.source.monster-source')?.textContent?.replaceAll(/\n[ ]*/g, '') || containerElement.querySelector('div.more-info-footer-source')?.textContent?.replaceAll(/\n[ ]*/g, '')
   }
 
@@ -223,7 +238,7 @@ const buildMonsterStats = (containerElement=document) => {
 
   buildDescriptionBlocks(descriptionBlocks, monster)
 
-  console.clear()
+  // console.clear()
   console.log(monster);
   download(monster)
 }
