@@ -1,10 +1,12 @@
 const STAT_BLOCK = `mon-stat-block__`
+const AUTOMATE = true
+
+const createRandomTime = (delay=6000) => delay + Math.ceil(Math.random() * 1500)
 
 // --- OPEN ALL BLOCKS --- //
 
 const handleOpenAllMonsterBlocks = () => {
   const infoBlocks = Array.from(document.querySelectorAll('div.info'))
-  console.log(infoBlocks)
   for (i = 0; i < infoBlocks.length; i++) {
     infoBlocks[i].click()
   }
@@ -22,9 +24,10 @@ const handleScrape = () => {
     for (i = 0; i < monsterBlocks.length; i++) {
       buildMonsterStats(monsterBlocks[i])
     }
-    const randTime = Math.ceil((Math.random() * 750) + 750)
-    console.log(randTime)
-    setTimeout(goToNextPage, randTime)
+    const randTime = createRandomTime()
+    if (AUTOMATE) {
+      setTimeout(goToNextPage, randTime)
+    }
   } else {
     console.error("Unable to scrape, invalid URL ( must be within /monsters, /monsters/ or /spells/ )")
   }
@@ -113,7 +116,7 @@ const buildAction = (p, monster) => {
     monster.spell_level = parseInt(spell_dc[0].match(/[0-9]+/)[0])
   }
 
-  const cantrips = p.innerText.match(/Cantrips \(at will\):[,' a-z]*/)
+  const cantrips = p.innerText.match(/Cantrips \(at will\):[,' a-z()]*/)
   if (cantrips && cantrips[0]) {
     const spells = cantrips[0].split(": ")[1].split(", ").map(sp => {
       return {
@@ -124,11 +127,12 @@ const buildAction = (p, monster) => {
     monster.spells = [...monster.spells, ...spells]
   }
 
-  const innateSpells = p.innerText.match(/[1-9]\/day[:,' a-z]*/)
-  if (innateSpells && innateSpells[0]) {
-    const spells = innateSpells[0].split(": ")[1].split(", ").map(sp => {
+  // INNATE SPELLS
+  if (p.innerText.match(/[1-9]\/day[:,' \(\)\d\w]*/)) {
+    const spellLinks = p.querySelectorAll('a.tooltip-hover.spell-tooltip')
+    const spells = Array.from(spellLinks).map(sp => {
       return {
-        name: sp.replace(/\([\w]*\)/g, "").trim(),
+        name: sp.textContent.replace(/\([\w]*\)/g, "").trim(),
         level: 0
       }
     })
@@ -187,6 +191,9 @@ const buildDescriptionBlocks = (descriptionBlocks, monster) => {
     }
   })
 }
+
+
+// --- CREATE AND ACTIVATE DOWNLOAD FOR JSON FILE --- //
 
 const download = (obj) => {
     var a = document.createElement("a");
@@ -346,28 +353,28 @@ const goToPrevPage = () => {
 // --- KEY PRESSES --- //
 
 const handleKeyPress = ({keyCode}) => {
-  if (keyCode === 90) {
+  if (keyCode === 90) { // z
     try {
       handleScrape()
     } catch (e) {
       console.error(e)
     }
   }
-  if (keyCode === 88) {
+  if (keyCode === 88) { // x
     try {
       handleOpenAllMonsterBlocks()
     } catch (e) {
       console.error(e)
     }
   }
-  if (keyCode === 37) {
+  if (keyCode === 66) { // b
     try {
       goToPrevPage()
     } catch (e) {
       console.error(e)
     }
   }
-  if (keyCode === 39) {
+  if (keyCode === 78) { // n
     try {
       goToNextPage()
     } catch (e) {
@@ -376,8 +383,19 @@ const handleKeyPress = ({keyCode}) => {
   }
 }
 
+// --- AUTOMATE SCRIPT --- //
+
+const automate = () => {
+  if (AUTOMATE) {
+    console.log("BEGINNING AUTOMATION")
+    setTimeout(handleOpenAllMonsterBlocks, createRandomTime(1000))
+    setTimeout(handleScrape, createRandomTime())
+  }
+}
+
 // --- RUN --- //
 
 document.addEventListener(`keyup`, handleKeyPress)
-console.clear()
 console.log("Monster scraper active")
+
+if (AUTOMATE) { automate() }
